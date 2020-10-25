@@ -1,0 +1,84 @@
+---
+title: "Homework 4"
+author: "Emmie Jenkins and Bradley Thompson"
+date: "10/25/2020"
+output: html_document
+---
+
+a)
+```{r}
+library("tidyverse"); library("extrafont"); library(viridis); library(MASS)
+theme_set(theme_minimal(base_family = "Roboto Condensed"))
+theme_update(panel.grid.minor = element_blank())
+
+#should be correct; lmk if you notice anything that needs changed
+ggplot(diamonds)+
+  geom_histogram(aes(carat), binwidth = 1/6)+
+  geom_freqpoly(aes(carat), color="red", binwidth=1/6)+
+  geom_point(stat="bin", aes(carat), binwidth=1/6, color="red")
+  
+  
+
+```
+
+b)
+```{r cars}
+
+#still working on making the axes and legend correct, but wont be hard
+x <- seq(0, 2*pi, length.out = 100)
+y <- seq(0, 2*pi, length.out = 100)
+d1 <- expand.grid(x, y)
+
+fxy <- function(x, y) {
+  ans = (sin(2*x)+sin(2*y))/2
+  return(ans)
+}
+
+fuzz <- fxy(d1$Var1,d1$Var2)
+
+
+ggplot(d1, aes(Var1, Var2, fill = fuzz))+
+  geom_tile()+
+  theme_minimal()+
+  scale_fill_viridis()
+
+#also still need second graph and intend on going to office hours 
+```
+c)
+```{r}
+
+#definitely incorrect; need to figure out how to properly use kde2d function and exctract density
+
+df <- data.frame(x = 1:5, y = 1:5)
+
+dens_df <- data.frame(1:5, 1:5, kde2d(1:5, 1:5, 50)) 
+
+
+ggplot(dens_df, aes(X1.5,X1.5.1))+
+  geom_raster(fill)
+
+```
+
+
+d)
+```{r}
+#should be easy; may need to each have individual answers and may not even need any code
+```
+
+e)
+```{r pressure}
+
+#need to figure out how to make the points jitter slightly 
+set.seed(2)
+logistic <- function(x) 1 / (1 + exp(-x))
+n <- 50
+df <- tibble(
+  x = c(rnorm(n, -1),rnorm(n, 1)),
+  p = logistic(0 + 2*x),
+  y = rbinom(2*n, 1, p)
+  )
+
+ggplot(df, aes(x, y)) +
+  geom_point() + 
+  stat_smooth(method = "glm", method.args=list(family = "binomial"))
+```
