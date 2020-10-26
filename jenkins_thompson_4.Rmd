@@ -27,17 +27,15 @@ b)
 
 #still working on making the axes and legend correct, but wont be hard
 n <- 101
-(d1 <- expand.grid(
+(df <- expand.grid(
   "x" = seq(0, 2*pi, length.out = n), 
   "y" = seq(0, 2*pi, length.out = n)
 ))
 
-d1 <- d1 %>% 
-  mutate(
-    "fuzz" = (sin(2*x) + sin(2*y)) / 2
-  )
+df <- df %>% 
+  mutate("fuzz" = (sin(2*x) + sin(2*y)) / 2)
 
-ggplot(d1, aes(x, y, fill = fuzz)) +
+ggplot(df, aes(x, y, fill = fuzz)) +
   geom_tile() +
   theme_minimal() +
   scale_fill_viridis() +
