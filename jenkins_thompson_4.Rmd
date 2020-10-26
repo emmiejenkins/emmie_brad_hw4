@@ -7,7 +7,7 @@ output: html_document
 
 a)
 ```{r}
-library(tidyverse); library(extrafont); library(viridis); library(MASS)
+library("tidyverse"); library("extrafont"); library(viridis); library(MASS)
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
 theme_update(panel.grid.minor = element_blank())
 
@@ -81,121 +81,5 @@ df <- tibble(
 ggplot(df, aes(x, y)) +
   geom_point() + 
   stat_smooth(method = "glm", method.args=list(family = "binomial"))
-```
-
-2pre)
-```{r echo=FALSE}
-dot <- function(x, y){
-  total <- 0
-  for(i in 1:length(x)){
-    total <- total + x[i] * y[i]
-  }
-  total
-}
-
-norm <- function(x){
-  xnorm <- sqrt(dot(x,x))
-  xnorm
-}
-
-normalize <- function(x){
-  xnormalize <- x
-  if(norm(x) != 0){
-    for (i in 1:length(x)){
-      xnormalize[i] <- xnormalize[i]/norm(x)
-    }
-  }
-  xnormalize
-}
-```
-
-a)
-```{r}
-make_positive <- function(x) sign(x[1]) * x
-
-emax <- function(X, tol = sqrt(.Machine$double.eps)) {
-  y <- c(1:length(X[1,]))
-  for(i in 1:length(y)){
-    y[i] = 0
-  }
-  y[1] <- 1
-  new_norm <- 1
-  old_norm <- 0
-  while(abs(new_norm - old_norm) > tol){
-    old_norm <- new_norm
-    y <- X %*% y
-    new_norm <- norm(y)
-    y <- normalize(y)
-    y <- make_positive(y)
-  }
-  lamda <- t(y) %*% X %*% y
-  a <- list("value" = lamda, "vector" = y)
-  a
-}
-#testing function
-(A <- matrix(c(1:4, 6:10), nrow = 3, byrow = TRUE))
-eigen(A)
-emax(A)
-```
-
-b)
-```{r}
-make_first_row_positive <- function(A) apply(A, 2, make_positive)
-
-eigen_qr <- function(A, tol = sqrt(.Machine$double.eps)){
-  A_i <- A
-  U_i <- matrix(0, ncol = ncol(A), nrow = nrow(A))
-  for(i in 1:nrow(A)){
-    U_i[i,i] <- 1
-  }
-  new_norm <- 0
-  old_norm <- 1
-  QR <- qr(A)
-  Q_i <- qr.Q(QR)
-  R_i <- qr.R(QR)
-  #this loop only ever gets 1 iteration,  becasue new norm keeps equaling old, any idea why? 
-  while(abs(old_norm - new_norm) > tol){
-    old_norm <- new_norm
-    A_i <- R_i %*% Q_i
-    new_norm <- norm(A_i)
-    A_i <- make_first_row_positive(A_i)
-    U_i <- U_i %*% Q_i
-    QR <- qr(A_i)
-    Q_i <- qr.Q(QR)
-    R_i <- qr.R(QR)
-  }
-  ev <- c(1:nrow(A_i))
-  for(i in 1:nrow(A_i)){
-    ev[i] <- A_i[i,i]
-  }
-  a <- list("values" = ev, "vectors" = U_i)
-  a
-}
-
-#testing function
-(A <- matrix(c(1:4, 6:10), nrow = 3, byrow = TRUE))
-A <- crossprod(A)
-eigen(A)
-eigen_qr(A)
-```
-
-c)
-```{r}
-det_qr <- function(A){
-  x <- eigen_qr(A)
-  y <- x$values
-  z <- 1
-  for(i in 1:length(y)){
-    z <- z * y[i]
-  }
-  z
-}
-
-#testing
-set.seed(2)
-A <- matrix(rpois(64, lambda = 5), nrow = 8)
-A <- crossprod(A)
-det(A)
-det_qr(A)
 ```
 
