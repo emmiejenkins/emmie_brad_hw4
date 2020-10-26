@@ -6,7 +6,7 @@ output: pdf_document
 ---
 
 a)
-```{r}
+```{r q1a}
 library("tidyverse")
 library("extrafont")
 library("viridis")
@@ -16,39 +16,39 @@ theme_set(theme_minimal(base_family = "Roboto Condensed"))
 theme_update(panel.grid.minor = element_blank())
 
 #should be correct; lmk if you notice anything that needs changed
-ggplot(diamonds)+
-  geom_histogram(aes(carat), binwidth = 1/6)+
-  geom_freqpoly(aes(carat), color="red", binwidth=1/6)+
+ggplot(diamonds) +
+  geom_histogram(aes(carat), binwidth = 1/6) +
+  geom_freqpoly(aes(carat), color="red", binwidth=1/6) +
   geom_point(stat="bin", aes(carat), binwidth=1/6, color="red")
-  
 ```
 
 b)
-```{r cars}
+```{r q1b}
 
 #still working on making the axes and legend correct, but wont be hard
-x <- seq(0, 2*pi, length.out = 100)
-y <- seq(0, 2*pi, length.out = 100)
-d1 <- expand.grid(x, y)
+n <- 101
+(d1 <- expand.grid(
+  "x" = seq(0, 2*pi, length.out = n), 
+  "y" = seq(0, 2*pi, length.out = n)
+))
 
-fxy <- function(x, y) {
-  ans = (sin(2*x)+sin(2*y))/2
-  return(ans)
-}
+d1 <- d1 %>% 
+  mutate(
+    "fuzz" = (sin(2*x) + sin(2*y)) / 2
+  )
 
-fuzz <- fxy(d1$Var1,d1$Var2)
-
-
-ggplot(d1, aes(Var1, Var2, fill = fuzz))+
-  geom_tile()+
-  theme_minimal()+
-  scale_fill_viridis()+
+ggplot(d1, aes(x, y, fill = fuzz)) +
+  geom_tile() +
+  theme_minimal() +
+  scale_fill_viridis() +
   scale_x_continuous()
 
 #also still need second graph and intend on going to office hours 
 ```
+
+
 c)
-```{r}
+```{r q1c}
 
 #definitely incorrect; need to figure out how to properly use kde2d function and extract density
 df <- data.frame(x = 1:5, y = 1:5)
