@@ -5,15 +5,21 @@ date: "10/25/2020"
 output: pdf_document
 ---
 
+```{r setup, echo=FALSE, results=TRUE}
+knitr::opts_chunk$set(error=TRUE, dev="cairo_pdf")
+```
+
+
 a)
-```{r q1a}
+```{r q1a, message=FALSE}
 library("tidyverse")
 library("extrafont")
 library("viridis")
 library("MASS")
 
+# theme_set(theme_minimal())
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
-theme_update(panel.grid.minor = element_blank())
+# theme_update(panel.grid.minor = element_blank())
 
 #should be correct; lmk if you notice anything that needs changed
 ggplot(diamonds) +
@@ -27,10 +33,10 @@ b)
 
 #still working on making the axes and legend correct, but wont be hard
 n <- 101
-(df <- expand.grid(
+df <- expand.grid(
   "x" = seq(0, 2*pi, length.out = n), 
   "y" = seq(0, 2*pi, length.out = n)
-))
+)
 
 df <- df %>% 
   mutate("fuzz" = (sin(2*x) + sin(2*y)) / 2)
@@ -46,7 +52,7 @@ ggplot(df, aes(x, y, fill = fuzz)) +
 
 
 c)
-```{r q1c}
+```{r q1c, eval=FALSE}
 
 #definitely incorrect; need to figure out how to properly use kde2d function and extract density
 df <- data.frame(x = 1:5, y = 1:5)
@@ -120,28 +126,24 @@ normalize <- function(x){
 ```
 
 a)
-```{r}
+```{r q2a}
 make_positive <- function(x) sign(x[1]) * x
 
-emax <- function(X, tol = sqrt(.Machine$double.eps)) {
-  y <- c(1:length(X[1,]))
-  for(i in 1:length(y)){
-    y[i] = 0
-  }
-  y[1] <- 1
+emax <- function(A, tol = sqrt(.Machine$double.eps)) {
+  y <- c(1, rep(0, ncol(A)-1))
   new_norm <- 1
   old_norm <- 0
   while(abs(new_norm - old_norm) > tol){
     old_norm <- new_norm
-    y <- X %*% y
+    y <- A %*% y
     new_norm <- norm(y)
     y <- normalize(y)
     y <- make_positive(y)
   }
-  lamda <- t(y) %*% X %*% y
-  a <- list("value" = lamda, "vector" = y)
-  a
+  
+  list("value" = t(y) %*% A %*% y, "vector" = y)
 }
+
 #testing function
 (A <- matrix(c(1:4, 6:10), nrow = 3, byrow = TRUE))
 eigen(A)
@@ -149,37 +151,29 @@ emax(A)
 ```
 
 b)
-```{r}
+```{r q2b}
 make_first_row_positive <- function(A) apply(A, 2, make_positive)
 
 eigen_qr <- function(A, tol = sqrt(.Machine$double.eps)){
+  # initialize A_i and U_i
   A_i <- A
-  U_i <- matrix(0, ncol = ncol(A), nrow = nrow(A))
-  for(i in 1:nrow(A)){
-    U_i[i,i] <- 1
-  }
-  new_norm <- 0
-  old_norm <- 1
-  QR <- qr(A)
-  Q_i <- qr.Q(QR)
-  R_i <- qr.R(QR)
-  #this loop only ever gets 1 iteration,  becasue new norm keeps equaling old, any idea why? 
-  while(abs(old_norm - new_norm) > tol){
-    old_norm <- new_norm
-    A_i <- R_i %*% Q_i
-    new_norm <- norm(A_i)
-    A_i <- make_first_row_positive(A_i)
-    U_i <- U_i %*% Q_i
+  U_i <- diag(ncol(A))
+  
+  while (TRUE) {
+    # do the QR decomposition
     QR <- qr(A_i)
     Q_i <- qr.Q(QR)
     R_i <- qr.R(QR)
+    
+    # reorganize and update U
+    U_i_1 <- U_i
+    A_i <- R_i %*% Q_i
+    U_i <- make_first_row_positive(U_i %*% Q_i)
+  
+    if (norm(U_i - U_i_1) <= tol) break
   }
-  ev <- c(1:nrow(A_i))
-  for(i in 1:nrow(A_i)){
-    ev[i] <- A_i[i,i]
-  }
-  a <- list("values" = ev, "vectors" = U_i)
-  a
+  
+  list("values" = diag(A_i), "vectors" = U_i)
 }
 
 #testing function
@@ -190,7 +184,7 @@ eigen_qr(A)
 ```
 
 c)
-```{r}
+```{r q2c}
 det_qr <- function(A){
   x <- eigen_qr(A)
   y <- x$values
