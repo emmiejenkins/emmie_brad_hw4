@@ -2,12 +2,15 @@
 title: "Homework 4"
 author: "Emmie Jenkins and Bradley Thompson"
 date: "10/25/2020"
-output: html_document
+output: pdf_document
 ---
 
 a)
 ```{r}
-library("tidyverse"); library("extrafont"); library(viridis); library(MASS)
+library("tidyverse")
+library("extrafont")
+library(viridis)
+library(MASS)
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
 theme_update(panel.grid.minor = element_blank())
 
@@ -40,22 +43,25 @@ fuzz <- fxy(d1$Var1,d1$Var2)
 ggplot(d1, aes(Var1, Var2, fill = fuzz))+
   geom_tile()+
   theme_minimal()+
-  scale_fill_viridis()
+  scale_fill_viridis()+
+  scale_x_continuous()
 
 #also still need second graph and intend on going to office hours 
 ```
 c)
 ```{r}
 
-#definitely incorrect; need to figure out how to properly use kde2d function and exctract density
+#definitely incorrect; need to figure out how to properly use kde2d function and extract density
 
 df <- data.frame(x = 1:5, y = 1:5)
 
-dens_df <- data.frame(1:5, 1:5, kde2d(1:5, 1:5, 50)) 
+dens_df <- data.frame(1:5, 1:5, kde2d(1:5, 1:5)) 
 
+image(kde2d(1:5,1:5))
 
-ggplot(dens_df, aes(X1.5,X1.5.1))+
-  geom_raster(fill)
+ggplot()+
+  geom_point(data = df, aes(x,y), color = "red", size = 3)+
+  geom_raster(data = dens_df, aes(x, y, fill = z.1))
 
 ```
 
