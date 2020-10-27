@@ -80,6 +80,7 @@ a + b
 
 c)
 ```{r q1c, fig.align='center', fig.height= 4, fig.width=4}
+
 d_df <- data.frame(x = 0:6, y = 0:6)
 
 df <- data.frame(x = 1:5, y = 1:5)
@@ -105,8 +106,6 @@ ggplot()+
                      minor_breaks = NULL,
     labels = c("0", "2", "4", "6"))+
   labs(fill="density")
-
-
 ```
 
 
@@ -119,9 +118,8 @@ What  is  the  difference  between cut_interval(),cut_number(),  and cut_width()
 
 - cut_width cuts the given vector into groups with equal range, but instead of being cut into n number of parts, it is cut into parts by a given width
 
-
 e)
-```{r q1e, fig.height= 3}
+```{r q1e, fig.height=3}
 set.seed(2)
 logistic <- function(x) 1 / (1 + exp(-x))
 n <- 50
@@ -136,8 +134,6 @@ ggplot(df, aes(x, y)) +
   stat_smooth(method = "glm", method.args=list(family = "binomial"))+
   scale_y_continuous(minor_breaks = NULL)+
   scale_x_continuous(minor_breaks = NULL, limits = c(-4,4))
-
-
 ```
 
 
@@ -165,45 +161,6 @@ normalize <- function(x){
   }
   xnormalize
 }
-
-is.zero <- function(x){
-  if(abs(norm(x)) < sqrt(.Machine$double.eps)){
-    return(TRUE)
-  }
-  else{
-    return(FALSE)
-  }
-}
-
-project_onto <- function(y, x, normalized_x = FALSE){
-  stopifnot(length(x) == length(y))
-  if (is.zero(x)) return(rep(0, length(x)))
-  if (normalized_x) dot(y, x) * x else dot(y, x) / dot(x, x) * x
-}
-  
-discard_zero_cols <- function(M) M[,!apply(M, 2, is.zero)]
-gs <- function(A){
-  # initialize basis matrix
-  e <- matrix(0, nrow = nrow(A), ncol = ncol(A))
-  e[,1L] <- normalize(A[,1L])
-  # orthogonalize and normalize column by column
-  for (j in 2L:ncol(A)){
-    e_tilde <- A[,j]
-  # subtract parallel components
-    for (k in 1L:(j-1L)){
-      e_tilde <- e_tilde - project_onto(e_tilde, e[,k], normalized_x = TRUE)
-    }
-    # normalize
-    if (norm(e_tilde) < sqrt(.Machine$double.eps)){
-      e[,j] <- rep(0, nrow(A))
-    } else
-    {e[,j] <- normalize(e_tilde)
-    }
-  }# end for loop over columns
-  # return
-  discard_zero_cols(e)
-}
-
 ```
 
 a)
@@ -242,8 +199,9 @@ eigen_qr <- function(A, tol = sqrt(.Machine$double.eps)){
   
   while (TRUE) {
     # do the QR decomposition
-    Q_i <- gs(A_i)
-    R_i <- t(Q_i) %*% A_i
+    QR <- qr(A_i)
+    Q_i <- qr.Q(QR)
+    R_i <- qr.R(QR)
     
     # reorganize and update U
     U_i_1 <- U_i
@@ -268,9 +226,11 @@ c)
 det_qr <- function(A){
   x <- eigen_qr(A)
   y <- x$values
-  xsum <- 0
-  for(i in seq_along(y)) xsum <- xsum + log(y[i])
-  exp(xsum)
+  z <- 1
+  for(i in 1:length(y)){
+    z <- z * y[i]
+  }
+  z
 }
 
 #testing
