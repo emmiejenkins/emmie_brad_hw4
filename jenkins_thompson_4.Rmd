@@ -11,11 +11,12 @@ knitr::opts_chunk$set(error=TRUE, dev="cairo_pdf")
 
 
 a)
-```{r q1a, message=FALSE}
+```{r q1a, message=FALSE, warning=FALSE, fig.width=7, fig.height=3}
 library("tidyverse")
 library("extrafont")
 library("viridis")
 library("MASS")
+library("patchwork")
 
 #theme_set(theme_minimal())
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
@@ -24,7 +25,12 @@ theme_set(theme_minimal(base_family = "Roboto Condensed"))
 ggplot(diamonds) +
   geom_histogram(aes(carat), binwidth = 1/6) +
   geom_freqpoly(aes(carat), color="red", binwidth=1/6) +
-  geom_point(stat="bin", aes(carat), binwidth=1/6, color="red")
+  geom_point(stat="bin", aes(carat), binwidth=1/6, color="red")+
+  scale_y_continuous(minor_breaks = NULL)+
+  scale_x_continuous(minor_breaks = NULL,
+                     limits = c(0,5))
+
+
 ```
 
 b)
@@ -38,52 +44,84 @@ df <- expand.grid(
 df <- df %>% 
   mutate("fuzz" = (sin(2*x) + sin(2*y)) / 2)
 
-ggplot(df, aes(x, y, fill = fuzz))+
+a <- ggplot(df, aes(x, y, fill = fuzz))+
   geom_tile()+
   theme_minimal()+
   scale_fill_viridis(limits = c(-1,1), breaks = c(-1, -0.5, 0, 0.5, 1))+
   scale_x_continuous(name = "",
-                     breaks = 0:4,
+                     breaks = seq(from = 0, to = 2*pi, by = pi/2),
                      minor_breaks = NULL,
     labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
    scale_y_continuous(name = "",
-                     breaks = 0:4,
+                     breaks = seq(from = 0, to = 2*pi, by = pi/2),
                      minor_breaks = NULL,
     labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
-  labs(fill = "f(x,y)")
-  
-   
-  
+  labs(fill = "f(x,y)")+
+  coord_equal()
+
+b <- ggplot(df, aes(x, y, z = fuzz))+
+  geom_contour(aes(color = stat(nlevel)))+
+  theme_minimal()+
+  scale_color_viridis(limits = c(-1,1), breaks = c(-1, -0.5, 0, 0.5, 1))+
+  scale_x_continuous(name = "",
+                     breaks = seq(from = 0, to = 2*pi, by = pi/2),
+                     minor_breaks = NULL,
+    labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
+   scale_y_continuous(name = "",
+                     breaks = seq(from = 0, to = 2*pi, by = pi/2),
+                     minor_breaks = NULL,
+    labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
+  labs(color = "f(x,y)")+
+  coord_equal()
+
+a + b
 ```
 
 
 c)
-```{r q1c, eval=FALSE}
+```{r q1c, fig.align='center', fig.height= 4, fig.width=4}
+d_df <- data.frame(x = 0:6, y = 0:6)
+
 df <- data.frame(x = 1:5, y = 1:5)
 
-dens_df <- data.frame(1:5, 1:5, kde2d(1:5, 1:5)) 
+dens_df <- data.frame(1:5, 1:5, kde2d(0:6, 0:6)) 
 
-ggplot(df, aes(x,y))+
-  stat_density2d( 
-    aes(fill = stat(ndensity)),
+ggplot()+
+  stat_density2d(data = d_df,
+    aes(x, y, fill = stat(ndensity)/20),
     geom = "raster", 
     contour = FALSE
   )+
-  scale_fill_viridis()+
-  geom_point(color = "red", size = 3)
+  scale_fill_viridis(limits = c(0.00001,.049999))+
+  theme_minimal()+
+  geom_point(data = df, aes(x,y), color = "red", size = 3)+
+  coord_equal()+
+  scale_x_continuous(
+                     breaks = c(0,2,4,6),
+                     minor_breaks = NULL,
+    labels = c("0", "2", "4", "6"))+
+   scale_y_continuous(
+                     breaks = c(0,2,4,6),
+                     minor_breaks = NULL,
+    labels = c("0", "2", "4", "6"))+
+  labs(fill="density")
+
 
 ```
 
 
 d)
-```{r}
-#should be easy; may need to each have individual answers and may not even need any code
-```
+What  is  the  difference  between cut_interval(),cut_number(),  and cut_width()?
+
+- cut_interval takes the given vector and cuts it into the given n number of parts, assuring that the range is the same for each of the intervals.
+
+- cut_number takes a given vector and cuts it into n number of equal parts, although the range may not be the same for each of the groups.
+
+- cut_width cuts the given vector into groups with equal range, but instead of being cut into n number of parts, it is cut into parts by a given width
+
 
 e)
-```{r pressure}
-
-#need to figure out how to make the points jitter slightly 
+```{r q1e, fig.height= 3}
 set.seed(2)
 logistic <- function(x) 1 / (1 + exp(-x))
 n <- 50
@@ -94,8 +132,12 @@ df <- tibble(
   )
 
 ggplot(df, aes(x, y)) +
-  geom_jitter(height=.01) + 
-  stat_smooth(method = "glm", method.args=list(family = "binomial"))
+  geom_jitter(height=.025) + 
+  stat_smooth(method = "glm", method.args=list(family = "binomial"))+
+  scale_y_continuous(minor_breaks = NULL)+
+  scale_x_continuous(minor_breaks = NULL, limits = c(-4,4))
+
+
 ```
 
 
