@@ -17,9 +17,9 @@ library("extrafont")
 library("viridis")
 library("MASS")
 
-theme_set(theme_minimal())
+#theme_set(theme_minimal())
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
-theme_update(panel.grid.minor = element_blank())
+#theme_update(panel.grid.minor = element_blank())
 
 ggplot(diamonds) +
   geom_histogram(aes(carat), binwidth = 1/6) +
@@ -202,4 +202,7 @@ A <- crossprod(A)
 det(A)
 det_qr(A)
 ```
+
+
+
 
