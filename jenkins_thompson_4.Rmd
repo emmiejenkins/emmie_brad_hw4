@@ -17,11 +17,10 @@ library("extrafont")
 library("viridis")
 library("MASS")
 
-# theme_set(theme_minimal())
+#theme_set(theme_minimal())
 theme_set(theme_minimal(base_family = "Roboto Condensed"))
-# theme_update(panel.grid.minor = element_blank())
+#theme_update(panel.grid.minor = element_blank())
 
-#should be correct; lmk if you notice anything that needs changed
 ggplot(diamonds) +
   geom_histogram(aes(carat), binwidth = 1/6) +
   geom_freqpoly(aes(carat), color="red", binwidth=1/6) +
@@ -30,8 +29,6 @@ ggplot(diamonds) +
 
 b)
 ```{r q1b}
-
-#still working on making the axes and legend correct, but wont be hard
 n <- 101
 df <- expand.grid(
   "x" = seq(0, 2*pi, length.out = n), 
@@ -41,36 +38,39 @@ df <- expand.grid(
 df <- df %>% 
   mutate("fuzz" = (sin(2*x) + sin(2*y)) / 2)
 
-ggplot(df, aes(x, y, fill = fuzz)) +
-  geom_tile() +
-  theme_minimal() +
-  scale_fill_viridis() +
-  scale_x_continuous()
-
-#also still need second graph and intend on going to office hours 
+ggplot(df, aes(x, y, fill = fuzz))+
+  geom_tile()+
+  theme_minimal()+
+  scale_fill_viridis(limits = c(-1,1), breaks = c(-1, -0.5, 0, 0.5, 1))+
+  scale_x_continuous(name = "",
+                     breaks = 0:4,
+                     minor_breaks = NULL,
+    labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
+   scale_y_continuous(name = "",
+                     breaks = 0:4,
+                     minor_breaks = NULL,
+    labels = expression(0, pi/2, pi, 3*pi/2, 2*pi))+
+  labs(fill = "f(x,y)")
+  
+   
+  
 ```
 
 
 c)
 ```{r q1c, eval=FALSE}
-
-#definitely incorrect; need to figure out how to properly use kde2d function and extract density
 df <- data.frame(x = 1:5, y = 1:5)
 
 dens_df <- data.frame(1:5, 1:5, kde2d(1:5, 1:5)) 
 
-image(kde2d(1:5,1:5))
-
-ggplot()+
-  geom_point(data = df, aes(x,y), color = "red", size = 3)+
-  geom_raster(data = dens_df, aes(x, y, fill = z.1))
-
-
-#example from help
-ggplot(faithfuld, aes(waiting, eruptions)) +
- geom_raster(aes(fill = density))
-
-faithfuld
+ggplot(df, aes(x,y))+
+  stat_density2d( 
+    aes(fill = stat(ndensity)),
+    geom = "raster", 
+    contour = FALSE
+  )+
+  scale_fill_viridis()+
+  geom_point(color = "red", size = 3)
 
 ```
 
@@ -238,4 +238,7 @@ A <- crossprod(A)
 det(A)
 det_qr(A)
 ```
+
+
+
 
